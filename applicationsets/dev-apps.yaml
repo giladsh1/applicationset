@@ -20,9 +20,9 @@ spec:
         path: charts/app
         helm:
           valueFiles:
-            - values/{{name}}/common.yaml
-            - values/{{name}}/dev.yaml
-            - versions/dev/{{name}}.yaml
+            - ../../values/{{name}}/common.yaml
+            - ../../values/{{name}}/dev.yaml
+            - ../../versions/dev/{{name}}.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: dev
