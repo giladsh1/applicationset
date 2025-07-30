@@ -8,7 +8,7 @@ spec:
       repoURL: https://github.com/giladsh1/applicationset.git
       revision: HEAD
       files:
-        - path: app-lists/dev-app-list.yaml
+        - path: app-lists/dev-app-list.json
   template:
     metadata:
       name: '{{name}}-dev'
