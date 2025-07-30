@@ -9,6 +9,7 @@ spec:
       revision: HEAD
       files:
         - path: app-lists/dev-app-list.json
+      requeueAfterSeconds: 30
   template:
     metadata:
       name: '{{name}}-dev'
