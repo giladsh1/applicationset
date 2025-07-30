@@ -5,7 +5,7 @@ metadata:
 spec:
   generators:
     - git:
-        repoURL: https://github.com/your-org/your-gitops-repo.git
+        repoURL: https://github.com/giladsh1/applicationset.git
         revision: HEAD
         files:
           - path: app-lists/dev-app-list.yaml
@@ -15,7 +15,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/your-org/your-gitops-repo.git
+        repoURL: https://github.com/giladsh1/applicationset.git
         targetRevision: HEAD
         path: charts/app
         helm:
@@ -30,8 +30,8 @@ spec:
         automated:
           prune: true
           selfHeal: true
-      syncOptions:
-      - Validate=true
-      - CreateNamespace=false
-      - PrunePropagationPolicy=foreground
-      - PruneLast=false
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=false
+          - PrunePropagationPolicy=foreground
+          - PruneLast=false
