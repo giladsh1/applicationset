@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-apps
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/your-org/your-gitops-repo.git
+        revision: HEAD
+        files:
+          - path: app-lists/dev-app-list.yaml
+  template:
+    metadata:
+      name: '{{name}}-dev'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/your-org/your-gitops-repo.git
+        targetRevision: HEAD
+        path: charts/app
+        helm:
+          valueFiles:
+            - values/{{name}}/common.yaml
+            - values/{{name}}/dev.yaml
+            - versions/dev/{{name}}.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{name}}-dev'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
