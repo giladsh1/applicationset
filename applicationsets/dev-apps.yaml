@@ -4,11 +4,11 @@ metadata:
   name: dev-apps
 spec:
   generators:
-    - git:
-        repoURL: https://github.com/giladsh1/applicationset.git
-        revision: HEAD
-        files:
-          - path: app-lists/dev-app-list.yaml
+  - git:
+      repoURL: https://github.com/your-org/your-gitops-repo.git
+      revision: HEAD
+      files:
+        - path: app-lists/dev-app-list.yaml
   template:
     metadata:
       name: '{{name}}-dev'
