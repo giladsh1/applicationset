@@ -1,4 +1,11 @@
 [
-  {"name": "app1"},
-  {"name": "app2"}
+    {
+        "name": "app1"
+    },
+    {
+        "name": "app2"
+    },
+    {
+        "name": "app3"
+    }
 ]
