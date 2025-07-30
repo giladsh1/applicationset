@@ -25,8 +25,13 @@ spec:
             - versions/dev/{{name}}.yaml
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{name}}-dev'
+        namespace: dev
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
+      syncOptions:
+      - Validate=true
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground
+      - PruneLast=false

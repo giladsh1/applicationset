@@ -1,3 +1,2 @@
 image:
-  repository: myregistry.example.com/app1
-  tag: v1.2.3
+  tag: 1.29

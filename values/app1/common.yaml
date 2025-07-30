@@ -1,3 +1,4 @@
+appName: app1
 replicaCount: 2
 service:
   type: ClusterIP
