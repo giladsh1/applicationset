@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: "git@github.com:giladsh1/gitops-system-charts.git"
+    repoURL: https://github.com/giladsh1/applicationset.git
     path: charts/infra
     targetRevision: HEAD
     helm:

@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/giladsh1/applicationset.git
-    targetRevision: HEAD
+    targetRevision: dev
     path: system-apps/dev/apps
     directory:
       recurse: true
