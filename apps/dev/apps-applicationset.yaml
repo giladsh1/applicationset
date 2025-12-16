@@ -7,9 +7,9 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/giladsh1/applicationset.git
-        revision: HEAD
+        revision: dev
         files:
-          - path: values-environments/argocd/dev/apps-list.json
+          - path: apps/dev/apps/apps-list.json
         requeueAfterSeconds: 30
   template:
     metadata:
