@@ -1,31 +1,31 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: external-dns
-  namespace: argocd
-spec:
-  project: default
-  sources:
-    - repoURL: "git@github.com:giladsh1/gitops-system-charts.git"
-      path: external-dns
-      targetRevision: HEAD
-      helm:
-        releaseName: external-dns
-        valueFiles:
-          - $values/values-system-apps/dev/external-dns.yaml
-    - repoURL: "git@github.com:metaflowltd/gitops-backend.git"
-      targetRevision: HEAD
-      ref: values
-  destination:
-    server: "https://kubernetes.default.svc"
-    namespace: kube-system
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-      allowEmpty: false
-    syncOptions:
-      - Validate=true
-      - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
-      - PruneLast=true
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: external-dns
+#   namespace: argocd
+# spec:
+#   project: default
+#   sources:
+#     - repoURL: "git@github.com:giladsh1/gitops-system-charts.git"
+#       path: external-dns
+#       targetRevision: HEAD
+#       helm:
+#         releaseName: external-dns
+#         valueFiles:
+#           - $values/values-system-apps/dev/external-dns.yaml
+#     - repoURL: "git@github.com:metaflowltd/gitops-backend.git"
+#       targetRevision: HEAD
+#       ref: values
+#   destination:
+#     server: "https://kubernetes.default.svc"
+#     namespace: kube-system
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#       allowEmpty: false
+#     syncOptions:
+#       - Validate=true
+#       - CreateNamespace=true
+#       - PrunePropagationPolicy=foreground
+#       - PruneLast=true
