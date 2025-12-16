@@ -1,5 +1,8 @@
 [
     {
+        "name": "infra"
+    },
+    {
         "name": "app1"
     }
 ]

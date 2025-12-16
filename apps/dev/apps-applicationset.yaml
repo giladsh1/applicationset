@@ -28,7 +28,7 @@ spec:
             - ../../versions/dev/{{name}}.yaml
       destination:
         server: https://kubernetes.default.svc
-        namespace: charm
+        namespace: dev
       syncPolicy:
         automated:
           prune: true

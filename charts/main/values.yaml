@@ -1,0 +1,5 @@
+namespace:
+  create: false
+
+deployment:
+  create: false
