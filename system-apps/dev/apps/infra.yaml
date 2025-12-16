@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/giladsh1/applicationset.git
     path: charts/infra
-    targetRevision: HEAD
+    targetRevision: dev
     helm:
       releaseName: infra
       valueFiles:
