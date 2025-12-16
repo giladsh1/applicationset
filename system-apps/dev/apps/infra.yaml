@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: "git@github.com:giladsh1/gitops-system-charts.git"
+    path: charts/infra
+    targetRevision: HEAD
+    helm:
+      releaseName: infra
+      valueFiles:
+        - values-environments/dev/common.yaml
+        - values-apps/infra/common.yaml
+        - values-apps/infra/dev.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: infra
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

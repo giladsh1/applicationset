@@ -1,4 +1,5 @@
-env: customer1
+env:
+  name: customer1
 annotations:
-  app.kubernetes.io/env: customer1
+  app.kubernetes.io/env: "{{ .Values.env.name }}"
 db_host: customer1-db-host

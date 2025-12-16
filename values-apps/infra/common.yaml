@@ -1,3 +1,6 @@
 namespace:
   create: true
-  name: dev
+  name: "{{ .Values.env.name }}"
+
+# we can add infra objects that we need here
+# e.g. using crossplane to create buckets, databases, etc.

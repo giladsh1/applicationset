@@ -1,4 +1,5 @@
-env: prod
+env:
+  name: prod
 annotations:
-  app.kubernetes.io/env: prod
+  app.kubernetes.io/env: "{{ .Values.env.name }}"
 db_host: prod-db-host
