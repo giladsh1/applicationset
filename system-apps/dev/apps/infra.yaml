@@ -14,9 +14,9 @@ spec:
     helm:
       releaseName: infra
       valueFiles:
-        - values-environments/dev/common.yaml
-        - values-apps/infra/common.yaml
-        - values-apps/infra/dev.yaml
+        - ../../values-environments/dev/common.yaml
+        - ../../values-apps/infra/common.yaml
+        - ../../values-apps/infra/dev.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: infra
