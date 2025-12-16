@@ -1,4 +1,5 @@
-env: dev
+env:
+  name: dev
 annotations:
-  app.kubernetes.io/env: dev
+  app.kubernetes.io/env: { { .Values.env.name } }
 db_host: dev-db-host
