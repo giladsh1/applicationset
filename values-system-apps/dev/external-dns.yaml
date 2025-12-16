@@ -1,0 +1,4 @@
+external-dns:
+  domainFilters:
+    - dev-gilad.com
+  txtOwnerId: external-dns-dev-gilad

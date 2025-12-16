@@ -1,0 +1,4 @@
+env: prod
+annotations:
+  app.kubernetes.io/env: prod
+db_host: prod-db-host

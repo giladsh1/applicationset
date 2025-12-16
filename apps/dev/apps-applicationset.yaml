@@ -5,29 +5,30 @@ metadata:
   namespace: argocd
 spec:
   generators:
-  - git:
-      repoURL: https://github.com/giladsh1/applicationset.git
-      revision: HEAD
-      files:
-        - path: app-lists/dev-app-list.json
-      requeueAfterSeconds: 30
+    - git:
+        repoURL: https://github.com/giladsh1/applicationset.git
+        revision: HEAD
+        files:
+          - path: values-environments/argocd/dev/apps-list.json
+        requeueAfterSeconds: 30
   template:
     metadata:
-      name: '{{name}}-dev'
+      name: "{{name}}-dev"
     spec:
       project: default
       source:
         repoURL: https://github.com/giladsh1/applicationset.git
-        targetRevision: HEAD
-        path: charts/app
+        targetRevision: dev
+        path: charts/main
         helm:
           valueFiles:
-            - ../../values/{{name}}/common.yaml
-            - ../../values/{{name}}/dev.yaml
+            - ../../values-environments/dev/common.yaml
+            - ../../values-apps/{{name}}/common.yaml
+            - ../../values-apps/{{name}}/dev.yaml
             - ../../versions/dev/{{name}}.yaml
       destination:
         server: https://kubernetes.default.svc
-        namespace: dev
+        namespace: charm
       syncPolicy:
         automated:
           prune: true

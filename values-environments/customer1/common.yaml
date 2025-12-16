@@ -1,0 +1,4 @@
+env: customer1
+annotations:
+  app.kubernetes.io/env: customer1
+db_host: customer1-db-host
