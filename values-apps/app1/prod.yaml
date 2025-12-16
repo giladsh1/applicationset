@@ -1,1 +1,1 @@
-env: prod
+replicaCount: 2
