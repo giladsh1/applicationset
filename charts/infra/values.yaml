@@ -5,5 +5,5 @@ namespace:
 prometheusRules:
   enabled: false
 
-s3buckets:
-  enabled: false
+s3:
+  buckets: []
