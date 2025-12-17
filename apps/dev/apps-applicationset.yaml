@@ -9,7 +9,7 @@ spec:
         repoURL: https://github.com/giladsh1/applicationset.git
         revision: dev
         files:
-          - path: apps/dev/apps/apps-list.json
+          - path: apps/dev/apps/appsList.json
         requeueAfterSeconds: 30
   template:
     metadata:
