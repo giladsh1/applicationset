@@ -18,6 +18,11 @@ deployment:
     maxUnavailable: 2
   command: []
 
+image:
+  pullPolicy: IfNotPresent
+  repository: nginx
+  tag: ""
+
 service:
   enabled: false
 
@@ -42,6 +47,7 @@ scaledobject:
 
 serviceAccount:
   enabled: true
+  annotations: {}
 
 poddisruptionbudget:
   enabled: false

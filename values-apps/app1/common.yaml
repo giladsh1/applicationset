@@ -4,7 +4,20 @@ replicaCount: 1
 
 deployment:
   enabled: true
+  podDisruptionBudget:
+    enabled: true
 
 service:
   enabled: true
   type: ClusterIP
+  headless: true
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+resources:
+  limits:
+    memory: 50Mi
+  requests:
+    cpu: 0.3
+    memory: 50Mi

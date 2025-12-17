@@ -107,7 +107,7 @@ Define a timestamp generator helper
 Define default image repository
 */}}
 {{- define "image.repository" -}}
-{{- default (printf "%s/server-%s" .Values.image.registry .Values.fullnameOverride) .Values.image.repository -}}
+{{- default .Values.image.repository -}}
 {{- end -}}
 
 {{/*
