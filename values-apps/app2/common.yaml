@@ -1,4 +1,4 @@
-fullnameOverride: app1
+fullnameOverride: app2
 
 replicaCount: 1
 
@@ -23,4 +23,4 @@ resources:
 
 configmap:
   data:
-    APP_VALUE: app1-value
+    APP_VALUE: app2-value
