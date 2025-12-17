@@ -1,0 +1,104 @@
+{{- if and (hasKey .Values "scaledjob") .Values.scaledjob.enabled }}
+apiVersion: keda.sh/v1alpha1 # Keda v2 https://keda.sh/docs/2.10/migration/
+kind: ScaledJob
+metadata:
+  name: {{ default (include "application.fullname" .) .Values.scaledjob.name | quote }}
+  labels:
+    {{- include "application.datadogLabels" . | indent 4 }}
+spec:
+  jobTargetRef:
+    parallelism: {{ .Values.scaledjob.jobTargetRef.parallelism }}
+    completions: {{ .Values.scaledjob.jobTargetRef.completions }}
+    activeDeadlineSeconds: {{ .Values.scaledjob.jobTargetRef.activeDeadlineSeconds }}
+    backoffLimit: {{ .Values.scaledjob.jobTargetRef.backoffLimit }}
+    template:
+      metadata:
+      {{- if or .Values.podAnnotations (include "application.datadogAnnotations" .) }}
+        annotations:
+          {{- with .Values.podAnnotations }}
+          {{- toYaml . | indent 10 }}
+          {{- end }}
+          {{- with (include "application.datadogAnnotations" .) }}
+          {{- . | indent 10 }}
+          {{- end }}
+          {{- end }}
+        labels:
+          {{- include "application.selectorLabels" . | nindent 10 }}
+          {{- include "application.datadogLabels" . | indent 10 }}
+      spec:
+        {{- with .Values.affinity }}
+        affinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.tolerations }}
+        tolerations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        serviceAccountName: {{ include "application.serviceAccountName" . }}
+        containers:
+        - name: {{ default (include "application.fullname" .) .Values.scaledjob.name | quote }}
+          image: "{{ include "image.repository" . }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.scaledjob.resources | trim | nindent 12 }}
+          env:
+            {{- range $key, $value := .Values.envVarOverride }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: APP_NAME
+              value: {{ .Values.fullnameOverride | quote }}
+            {{- include "tplvalues.render" ( dict "value" ( include "application.restartTriggers" .) "context" $) | indent 12 }}
+            {{- if .Values.env.javaOpts }}
+            - name: JAVA_OPTS
+              value: {{ .Values.env.javaOpts | quote }}
+            {{- end }}
+            {{- if .Values.env.jdkJavaOptions }}
+            - name: JDK_JAVA_OPTIONS
+              value: {{ .Values.env.jdkJavaOptions | quote }}
+            {{- end }}
+            {{- /* Needed for the TriggerAuthentication */}}
+            - name: KAFKA_SASL
+              value: plaintext
+            - name: KAFKA_TLS
+              value: enable
+            {{- if and .Values.datadog .Values.datadog.enabled }}
+            {{- include "datadog.envVars" . | trim | nindent 12 }}
+            {{- end }}
+            {{- $topicEnvVars := include "kafka.setTopicEnvVars" . | trim }}
+            {{- if $topicEnvVars }}
+            {{ $topicEnvVars | trim | nindent 12 | trim }}
+            {{- end }}
+          {{- if .Values.configmap.enabled }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "application.configMapName" . }}
+          {{- end }}
+          {{- if and .Values.extsecrets.enabled .Values.extsecrets.secrets (kindIs "slice" .Values.extsecrets.secrets) }}
+            {{- range $secret := .Values.extsecrets.secrets }}
+              {{- if or (and $secret.envs (kindIs "map" $secret.envs)) (and $secret.dataFrom (kindIs "slice" $secret.dataFrom)) }}
+          - secretRef:
+              name: {{ $secret.name }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          {{- $sharedSecrets := include "application.sharedSecrets" . | trim }}
+          {{- if $sharedSecrets }}
+          {{- include "application.sharedSecrets" . | trim | nindent 10 }}
+          {{- end }}
+          {{- include "chart.extsecrets.volumeMounts" . | indent 10 }}
+        {{- include "chart.extsecrets.volumes" . | indent 8 }}
+        restartPolicy: {{ .Values.scaledjob.restartPolicy | default "OnFailure" }}
+  pollingInterval: {{ .Values.scaledjob.pollingInterval }}
+  successfulJobsHistoryLimit: {{ .Values.scaledjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.scaledjob.failedJobsHistoryLimit }}
+  maxReplicaCount: {{ .Values.scaledjob.maxReplicaCount }}
+  rollout:
+    strategy: {{ .Values.scaledjob.rollout.strategy }}
+    propagationPolicy: {{ .Values.scaledjob.rollout.propagationPolicy }}
+  scalingStrategy:
+    strategy: {{ .Values.scaledjob.scalingStrategy.strategy }}
+    customScalingQueueLengthDeduction: {{ .Values.scaledjob.scalingStrategy.customScalingQueueLengthDeduction }}
+  triggers:
+{{- include "application.kedaTriggers" . | indent 4 -}}
+{{- end }}

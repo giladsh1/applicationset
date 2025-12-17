@@ -1,9 +1,10 @@
-appName: app1
+fullnameOverride: app1
 
 replicaCount: 1
 
 deployment:
-  create: true
+  enabled: true
 
 service:
+  enabled: true
   type: ClusterIP

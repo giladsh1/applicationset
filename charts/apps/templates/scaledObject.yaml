@@ -1,0 +1,32 @@
+{{- if and (.Values.autoscaling.enabled) (eq .Values.autoscaling.type "keda") (.Values.deployment.enabled) }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "application.fullname" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    criticality: {{ .Values.kafkaConsumer.priority | quote }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "application.fullname" . }}
+  minReplicaCount: {{ .Values.autoscaling.minReplicas }}
+  maxReplicaCount: {{ .Values.autoscaling.maxReplicas }}
+  pollingInterval: {{ .Values.autoscaling.pollingInterval }}
+  cooldownPeriod: {{ .Values.autoscaling.cooldownPeriod }}
+  fallback:
+    failureThreshold: {{ .Values.autoscaling.fallback.failureThreshold }}
+    replicas: {{ .Values.autoscaling.fallback.replicas }}
+  advanced:
+    restoreToOriginalReplicaCount: false
+    horizontalPodAutoscalerConfig:
+      name: {{ include "application.fullname" . }}
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: {{ .Values.autoscaling.scaleDownStabilizationWindowSeconds }}
+        scaleUp:
+          stabilizationWindowSeconds: {{ .Values.autoscaling.scaleUpStabilizationWindowSeconds }}
+  triggers:
+    {{- include "application.kedaTriggers" . | indent 4 }}
+{{- end }}

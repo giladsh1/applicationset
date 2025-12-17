@@ -1,0 +1,38 @@
+{{- if .Values.s3.buckets }}
+{{- range $bucket := .Values.s3.buckets }}
+---
+apiVersion: s3.services.k8s.aws/v1alpha1
+kind: Bucket
+metadata:
+  name: {{ include "tplvalues.render" (dict "value" $bucket.name "context" $) }}
+  namespace: {{ default $.Values.env.name $bucket.namespace }}
+spec:
+  name: {{ include "tplvalues.render" (dict "value" $bucket.name "context" $) }}
+  {{- if not $bucket.disableOwnerFullControl }}
+  acl: {{ default "bucket-owner-full-control" $bucket.acl }}
+  ownershipControls:
+    rules:
+      - objectOwnership: {{ default "BucketOwnerEnforced" $bucket.objectOwnership }}
+  {{- end }}
+  {{- if $bucket.publicAccessBlock }}
+  publicAccessBlock:
+    {{- toYaml $bucket.publicAccessBlock | nindent 4 }}
+  {{- end }}
+  {{- if $bucket.versioning }}
+  versioning:
+    {{- toYaml $bucket.versioning | nindent 4 }}
+  {{- end }}
+  {{- if $bucket.policy }}
+  policy: |-
+    {{- include "tplvalues.render" (dict "value" $bucket.policy "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if $bucket.tags }}
+  tagging:
+    tagSet:
+      {{- range $tag := $bucket.tags }}
+      - key: {{ include "tplvalues.render" (dict "value" $tag.key "context" $) }}
+        value: {{ include "tplvalues.render" (dict "value" $tag.value "context" $) }}
+      {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

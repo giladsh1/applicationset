@@ -1,25 +1,109 @@
-{{- if .Values.deployment.create }}
+{{- if .Values.deployment.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}
-  annotations:
-    app.kubernetes.io/name: {{ .Values.appName }}
-    app.kubernetes.io/version: "{{ .Values.image.tag }}"
-    app.kubernetes.io/env: {{ .Values.env.name }}
+  name: {{ include "application.fullname" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- if .Values.deployment.minReadySeconds }}
+  minReadySeconds: {{ .Values.deployment.minReadySeconds }}
+  {{- end }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      {{- include "application.selectorLabels" . | nindent 6 }}
+  progressDeadlineSeconds: {{ .Values.progressDeadlineSeconds }}
+  strategy:
+    type: {{ .Values.deployment.strategy.type  }}
+    rollingUpdate:
+      maxSurge: {{ .Values.deployment.strategy.maxSurge | quote }}
+      maxUnavailable: {{ .Values.deployment.strategy.maxUnavailable | quote}}
   template:
     metadata:
+      {{- $prometheusAnnotations := .Values.prometheusAnnotations | default .Values.defaults.prometheusAnnotations }}
+      {{- $usePrometheusAnnotations := (include "shouldUsePrometheusAnnotations" . | trim | eq "true") }}
+      {{- if or .Values.podAnnotations $usePrometheusAnnotations }}
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if $usePrometheusAnnotations }}
+        {{- toYaml $prometheusAnnotations | nindent 8 }}
+        {{- end }}
+      {{- end }}
       labels:
-        app: {{ .Values.appName }}
+        {{- include "application.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if .Values.deployment.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.deployment.terminationGracePeriodSeconds }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "application.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Values.appName }}
-          image: "nginx:{{ .Values.image.tag }}"
+        - name: {{ include "application.fullname" . }}
+          {{- if .Values.deployment.command }}
+          command: {{- include "tplvalues.render" (dict "value" .Values.deployment.command "context" $) | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ include "image.repository" . }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range $key, $value := .Values.envVarOverride }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: APP_NAME
+              value: {{ .Values.fullnameOverride | quote }}
+          {{- if .Values.configmap.enabled }}
+          envFrom:
+           - configMapRef:
+               name: {{ include "application.configMapName" . }}
+          {{- end }}
           ports:
-            - containerPort: 80
+            {{- range $index, $ports := .Values.service.ports }}
+            - name: port-{{ $index }}
+              containerPort: {{ $ports.targetPort }}
+            {{- end }}
+          {{- if .Values.startupProbe }}
+          startupProbe:
+            {{- include "renderProbe" .Values.startupProbe | trim | nindent 12 -}}
+          {{- end }}
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- include "renderProbe" .Values.livenessProbe | trim | nindent 12 -}}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- include "renderProbe" .Values.readinessProbe | trim | nindent 12 -}}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | trim | nindent 12 }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            {{- include "application.selectorLabels" . | nindent 12 }}
 {{- end }}

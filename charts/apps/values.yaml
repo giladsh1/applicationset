@@ -1,5 +1,53 @@
+defaults:
+  prometheusAnnotations:
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8080"
+    prometheus.io/scrape: "true"
+
 deployment:
-  create: false
+  enabled: false
+  strategy:
+    type: RollingUpdate
+    maxSurge: 25%
+    maxUnavailable: 25%
+  minReadySeconds: "" # minimum number of seconds a new pod should be ready without any of its containers crashing for it to be considered available, default is 0
+  terminationGracePeriodSeconds: "" #  how long Kubernetes waits for a pod to shut down gracefully after it receives a SIGTERM signal before forcibly killing it with SIGKILL, default is 600
+  podDisruptionBudget:
+    enabled: false
+    minAvailable: 50%
+    maxUnavailable: 2
+  command: []
+
+service:
+  enabled: false
+
+configmap:
+  enabled: false
+
+ingress:
+  enabled: false
+  rules: []
+
+job:
+  enabled: false
+
+cronjob:
+  enabled: false
+
+scaledjob:
+  enabled: false
+
+scaledobject:
+  enabled: false
+
+serviceAccount:
+  enabled: true
+
+poddisruptionbudget:
+  enabled: false
+
+autoscaling:
+  enabled: false
 
 env:
   name: ""

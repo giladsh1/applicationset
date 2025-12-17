@@ -1,0 +1,16 @@
+{{- if and .Values.prometheusRules (eq .Values.env.type "persistent") -}}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: prometheus-rules-{{ include "application.fullname" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    release: prometheus
+spec:
+  groups:
+  - name: {{ include "application.fullname" . }}
+    rules:
+    {{- range .Values.prometheusRules }}
+    - {{ tpl (toYaml .) $ | nindent 6 | trim }}
+    {{- end }}
+{{- end }}

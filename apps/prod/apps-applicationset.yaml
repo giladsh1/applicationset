@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: prod-apps
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/giladsh1/applicationset.git
+        revision: prod
+        files:
+          - path: apps/prod/apps/apps-list.json
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: "{{name}}-prod"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: prod
+      sources:
+        # Helm chart source
+        - repoURL: ghcr.io
+          chart: charm-security/agents-app
+          targetRevision: 0.0.3
+          helm:
+            valueFiles:
+              - $values/argocd/values/agents-app/values-development.yaml
+        # Git repo source for values / config
+        - repoURL: git@github.com:charm-security/infrastructure.git
+          targetRevision: main
+          ref: values
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - Validate=true
+          - CreateNamespace=false
+          - PrunePropagationPolicy=foreground
+          - PruneLast=false
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true

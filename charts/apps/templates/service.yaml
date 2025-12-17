@@ -1,0 +1,23 @@
+{{- if .Values.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "application.fullname" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.service.type }}
+  type: {{ .Values.service.type }}
+  {{- end }}
+  {{- if .Values.service.headless }}
+  clusterIP: None
+  {{- end }}
+  ports:
+    {{- range $index, $ports := .Values.service.ports }}
+    - name: {{ include "application.fullname" $ }}{{ $index }}
+      port: {{ $ports.port }}
+      targetPort: {{ $ports.targetPort }}
+    {{- end }}
+  selector:
+    {{- include "application.selectorLabels" . | nindent 4 }}
+{{- end }}

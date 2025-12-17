@@ -1,0 +1,87 @@
+{{- if and (hasKey .Values "job") .Values.job.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-%s" .Values.job.name (include "add.timestamp" .) }}
+  labels:
+    job: {{ printf "%s-%s" .Values.job.name (include "add.timestamp" .) }}
+  {{- if and (hasKey .Values.job "metadata") (hasKey .Values.job.metadata "annotations") }}
+  annotations:
+{{ toYaml .Values.job.metadata.annotations | indent 4 }}
+  {{- end }}
+spec:
+  parallelism: {{ .Values.job.parallelism }}
+  completions: {{ .Values.job.completions }}
+  activeDeadlineSeconds: {{ .Values.job.activeDeadlineSeconds }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        job: {{ printf "%s-%s" .Values.job.name (include "add.timestamp" .) }}
+        {{- include "application.datadogLabels" . | indent 8 }}
+      {{- if or .Values.job.template.annotations (include "application.datadogAnnotations" .) }}
+      annotations:
+        {{- with .Values.job.template.annotations }}
+        {{ toYaml . }}
+        {{- end }}
+        {{- with (include "application.datadogAnnotations" .) }}
+        {{ . | indent 8 | trim }}
+        {{- end }}
+      {{- end }}
+    spec:
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "application.serviceAccountName" . }}
+      containers:
+        - name: {{ printf "%s-%s" .Values.job.name (include "add.timestamp" .) }}
+          image: "{{ include "image.repository" . }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.job.resources | trim | nindent 12 }}
+          env:
+            {{- range $key, $value := .Values.envVarOverride }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: APP_NAME
+              value: {{ .Values.fullnameOverride | quote }}
+            {{- include "tplvalues.render" ( dict "value" (include "application.restartTriggers" .) "context" $) | indent 12 }}
+            {{- if .Values.env.javaOpts }}
+            - name: JAVA_OPTS
+              value: {{ .Values.env.javaOpts | quote }}
+            {{- end }}
+            {{- if and .Values.datadog .Values.datadog.enabled }}
+            {{- include "datadog.envVars" . | trim | nindent 12 }}
+            {{- end }}
+            {{- $topicEnvVars := include "kafka.setTopicEnvVars" . | trim }}
+            {{- if $topicEnvVars }}
+            {{ $topicEnvVars | trim | nindent 12 | trim }}
+            {{- end }}
+          {{- if .Values.configmap.enabled }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "application.configMapName" . }}
+          {{- end }}
+          {{- if and .Values.extsecrets.enabled .Values.extsecrets.secrets (kindIs "slice" .Values.extsecrets.secrets) }}
+          {{- range $secret := .Values.extsecrets.secrets }}
+          {{- if or (and $secret.envs (kindIs "map" $secret.envs)) (and $secret.dataFrom (kindIs "slice" $secret.dataFrom)) }}
+          - secretRef:
+              name: {{ $secret.name }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- $sharedSecrets := include "application.sharedSecrets" . | trim }}
+          {{- if $sharedSecrets }}
+          {{- include "application.sharedSecrets" . | trim | nindent 10 }}
+          {{- end }}
+          {{- include "chart.extsecrets.volumeMounts" . | indent 10 }}
+      {{- include "chart.extsecrets.volumes" . | indent 6 }}
+      restartPolicy: {{ default "Never" .Values.job.restartPolicy | quote }}
+  backoffLimit: {{ default 3 .Values.job.backoffLimit }}
+{{- end }}

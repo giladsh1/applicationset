@@ -1,0 +1,12 @@
+{{- if .Values.configmap.enabled -}}
+{{- $global := .Values.global | default dict }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "application.configMapName" . }}
+{{- with .Values.configmap.data }}
+data:
+  {{- include "tplvalues.render" ( dict "value" . "context" $) | nindent 4 }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,91 @@
+{{- if and (hasKey .Values "cronjob") .Values.cronjob.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "application.fullname" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    {{- include "application.datadogLabels" . | trim | nindent 4 }}
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  suspend: {{ .Values.cronjob.suspend }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy }}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ .Values.cronjob.ttlSecondsAfterFinished }}
+      activeDeadlineSeconds: {{ .Values.cronjob.activeDeadlineSeconds }}
+      parallelism: {{ .Values.cronjob.parallelism }}
+      completions: {{ .Values.cronjob.completions }}
+      template:
+        metadata:
+          {{- if or .Values.podAnnotations (include "application.datadogAnnotations" .) }}
+          annotations:
+            {{- with .Values.podAnnotations }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with (include "application.datadogAnnotations" .) }}
+            {{- . | trim | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          labels:
+            {{- include "application.selectorLabels" . | nindent 12 }}
+            {{- include "application.datadogLabels" . | indent 12 }}
+        spec:
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "application.serviceAccountName" . }}
+          containers:
+            - name: {{ include "application.fullname" . }}
+              image: "{{ include "image.repository" . }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              resources:
+                {{- toYaml .Values.cronjob.resources | trim | nindent 16 }}
+              env:
+                {{- range $key, $value := .Values.envVarOverride }}
+                - name: {{ $key }}
+                  value: {{ $value | quote }}
+                {{- end }}
+                - name: APP_NAME
+                  value: {{ .Values.fullnameOverride | quote }}
+                {{- if .Values.env.javaOpts }}
+                - name: JAVA_OPTS
+                  value: {{ .Values.env.javaOpts | quote }}
+                {{- end }}
+                {{- if .Values.env.jdkJavaOptions }}
+                - name: JDK_JAVA_OPTIONS
+                  value: {{ .Values.env.jdkJavaOptions | quote }}
+                {{- end }}
+                {{- if and .Values.datadog .Values.datadog.enabled }}
+                {{- include "datadog.envVars" . | trim | nindent 16 }}
+                {{- end }}
+                {{- $topicEnvVars := include "kafka.setTopicEnvVars" . | trim }}
+                {{- if $topicEnvVars }}
+                {{ $topicEnvVars | trim | nindent 16 | trim }}
+                {{- end }}
+              {{- if .Values.configmap.enabled }}
+              envFrom:
+              - configMapRef:
+                  name: {{ include "application.configMapName" . }}
+              {{- end }}
+              {{- if and .Values.extsecrets.enabled .Values.extsecrets.secrets (kindIs "slice" .Values.extsecrets.secrets) }}
+              {{- range $secret := .Values.extsecrets.secrets }}
+              {{- if or (and $secret.envs (kindIs "map" $secret.envs)) (and $secret.dataFrom (kindIs "slice" $secret.dataFrom)) }}
+              - secretRef:
+                  name: {{ $secret.name }}
+              {{- end }}
+              {{- end }}
+              {{- end }}
+              {{- $sharedSecrets := include "application.sharedSecrets" . | trim }}
+              {{- if $sharedSecrets }}
+              {{- include "application.sharedSecrets" . | trim | nindent 14 }}
+              {{- end }}
+              {{- include "chart.extsecrets.volumeMounts" . | indent 14 }}
+          {{- include "chart.extsecrets.volumes" . | indent 10 }}
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+{{- end }}

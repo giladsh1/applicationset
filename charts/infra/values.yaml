@@ -1,3 +1,9 @@
 namespace:
-  create: false
+  enabled: false
   name: ""
+
+prometheusRules:
+  enabled: false
+
+s3buckets:
+  enabled: false
