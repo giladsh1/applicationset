@@ -1,11 +1,5 @@
 [
     {
-        "name": "infra"
-    },
-    {
         "name": "app1"
-    },
-    {
-        "name": "app2"
     }
 ]
