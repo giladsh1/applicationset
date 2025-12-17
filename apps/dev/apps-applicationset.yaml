@@ -19,7 +19,7 @@ spec:
       source:
         repoURL: https://github.com/giladsh1/applicationset.git
         targetRevision: dev
-        path: charts/main
+        path: charts/apps
         helm:
           valueFiles:
             - ../../values-environments/dev/common.yaml
