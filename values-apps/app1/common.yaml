@@ -10,7 +10,6 @@ deployment:
 service:
   enabled: true
   type: ClusterIP
-  headless: true
   ports:
     - port: 8080
       targetPort: 8080

@@ -25,6 +25,7 @@ image:
 
 service:
   enabled: false
+  ports: []
 
 configmap:
   enabled: false
