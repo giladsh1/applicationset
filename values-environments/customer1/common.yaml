@@ -2,4 +2,9 @@ env:
   name: customer1
 annotations:
   app.kubernetes.io/env: "{{ .Values.env.name }}"
-db_host: customer1-db-host
+
+configmap:
+  enabled: true
+  data:
+    DB_HOST: customer1-db-host
+    TENANT_ID: 123456

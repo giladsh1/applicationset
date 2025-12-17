@@ -2,4 +2,8 @@ env:
   name: dev
 annotations:
   app.kubernetes.io/env: "{{ .Values.env.name }}"
-db_host: dev-db-host
+
+configmap:
+  enabled: true
+  data:
+    DB_HOST: dev-db-host
