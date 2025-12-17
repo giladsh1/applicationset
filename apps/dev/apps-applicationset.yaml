@@ -33,8 +33,11 @@ spec:
         automated:
           prune: true
           selfHeal: true
+          allowEmpty: false
         syncOptions:
           - Validate=true
           - CreateNamespace=false
           - PrunePropagationPolicy=foreground
           - PruneLast=false
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
