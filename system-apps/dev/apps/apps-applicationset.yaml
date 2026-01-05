@@ -20,7 +20,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/giladsh1/applicationset.git
-        targetRevision: v.1.0.1
+        targetRevision: v.1.0.2
         path: charts/apps
         helm:
           valueFiles:
