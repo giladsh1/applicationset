@@ -1,0 +1,4 @@
+apiVersion: v2
+name: migration
+version: 1.0.0
+description: Test migration job

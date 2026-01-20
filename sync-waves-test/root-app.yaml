@@ -1,0 +1,20 @@
+# Apply this manually: kubectl apply -f root-app.yaml
+# This deploys the child Application resources with sync-wave ordering
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sync-waves-test
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/giladsh1/applicationset.git
+    targetRevision: main
+    path: sync-waves-test/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

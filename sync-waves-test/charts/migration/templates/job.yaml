@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migration-job
+  annotations:
+    # This hook runs during PreSync phase of THIS application
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "=== Migration starting at $(date) ==="
+              echo "Simulating database migration..."
+              sleep 30
+              echo "Migration step 1: Creating tables... done"
+              sleep 10
+              echo "Migration step 2: Applying indexes... done"
+              sleep 10
+              echo "=== Migration completed at $(date) ==="
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 50m
+              memory: 32Mi
