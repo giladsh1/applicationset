@@ -16,12 +16,12 @@ spec:
             - -c
             - |
               echo "=== Migration starting at $(date) ==="
-              echo "Simulating database migration..."
-              sleep 30
+              echo "Simulating database migration (2 minutes)..."
+              sleep 60
               echo "Migration step 1: Creating tables... done"
-              sleep 10
+              sleep 30
               echo "Migration step 2: Applying indexes... done"
-              sleep 10
+              sleep 30
               echo "=== Migration completed at $(date) ==="
           resources:
             limits:
