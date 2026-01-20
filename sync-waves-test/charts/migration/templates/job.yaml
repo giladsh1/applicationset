@@ -2,10 +2,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: migration-job
-  annotations:
-    # This hook runs during PreSync phase of THIS application
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   backoffLimit: 1
   ttlSecondsAfterFinished: 300
