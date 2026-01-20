@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/giladsh1/applicationset.git
-    targetRevision: main
+    targetRevision: dev
     path: sync-waves-test/apps
   destination:
     server: https://kubernetes.default.svc

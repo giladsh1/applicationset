@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/giladsh1/applicationset.git
-    targetRevision: main
+    targetRevision: dev
     path: sync-waves-test/charts/service-b
   destination:
     server: https://kubernetes.default.svc
